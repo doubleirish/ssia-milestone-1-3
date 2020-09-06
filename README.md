@@ -351,8 +351,11 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
 ```
 
 
-##### replace your noop password encoder with a delegating password encoder
+## Implement a strong Passwword Decoder 
 
+##### replace your noop password encoder with a delegating password encoder
+the delegating password encoder is great as it allows you to have multiple password decoders active at once.
+so you could piecemail update the hash to a more secure one as users passwords expire rather than forcing everone to update at once.
 ```
 
 // @Bean
