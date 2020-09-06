@@ -43,16 +43,6 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
         clients.withClientDetails(clientDetailsService);
     }
 
-//    @Override
-//    public void configure(  ClientDetailsServiceConfigurer clients)
-//            throws Exception {
-//        clients.inMemory()
-//                .withClient("client")
-//                .secret("secret")
-//                .authorizedGrantTypes("password","authorization_code","client_credentials","refresh_token")
-//                .scopes("read");
-//    }
-
 
 
 
