@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
@@ -34,17 +35,23 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
     @Resource(name="authenticationManagerBean")
     private AuthenticationManager authenticationManager;
 
-
+    @Resource(name = "jpaClientDetailsService")
+    private ClientDetailsService clientDetailsService;
 
     @Override
-    public void configure(  ClientDetailsServiceConfigurer clients)
-            throws Exception {
-        clients.inMemory()
-                .withClient("client")
-                .secret("secret")
-                .authorizedGrantTypes("password","authorization_code","client_credentials","refresh_token")
-                .scopes("read");
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        clients.withClientDetails(clientDetailsService);
     }
+
+//    @Override
+//    public void configure(  ClientDetailsServiceConfigurer clients)
+//            throws Exception {
+//        clients.inMemory()
+//                .withClient("client")
+//                .secret("secret")
+//                .authorizedGrantTypes("password","authorization_code","client_credentials","refresh_token")
+//                .scopes("read");
+//    }
 
 
 

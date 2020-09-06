@@ -1,133 +1,319 @@
-#### SSIA Live Project Milestone 1.2
-Build an Oauth Server part 2    create JPA repositories  and REST controllers for storing and retrieving Users and Clients  </description>
-
-
+#### SSIA Live Project Milestone 1.3
+Build an Oauth Server part 3  - replace in-memory userDetailsService with a custom UserDetailsService that is DB backed</description>
  
 ##### Suggested  recommended reading list 
  
 1. SSIA Chapter 3  
+  
+  
+## create a custom UserDetailsService  
  
-
-Also useful (JPA)
- - JPA
-
- 
-
-
-#### OAuth Server project Setup part 2 JPA
-
-#####  Add H2 and JPA dependencies to pom.xml
+###  create a CustomUserDetails  class that implements UserDetails 
+You'll need to create a Custom User class that implements the following interface
 ```
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-jpa</artifactId>
-            </dependency>
+package org.springframework.security.core.userdetails;
 
-
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <scope>runtime</scope>
-            </dependency>
+public interface UserDetails extends Serializable {
+    Collection<? extends GrantedAuthority> getAuthorities();
+    String getPassword();
+    String getUsername();
+    boolean isAccountNonExpired();
+    boolean isAccountNonLocked();
+    boolean isCredentialsNonExpired();
+    boolean isEnabled();
+}
 ```
-
-## Setup a DB Backed UserDetailsService 
-##### Define USER and AUTHORITY tables
- 
-Under src/main/resources add a schema.sql file
-and define the SQL Tables 
-to store the user's credentials and the zero or more authorities they have.
+I can use the JPA user to help construct the SpringSecurity  Custom UserDetails instance
 ```
-drop table if exists AUTHORITY;
-drop table if exists USER; 
-
-create table if not exists USER
-(
-    ID INT auto_increment primary key,
-    USERNAME VARCHAR(50) not null,
-    PASSWORD VARCHAR(255) not null
-);
-
-create table  if not exists AUTHORITY
-(
-    ID INT auto_increment primary key,
-    USER_ID INT not null,
-    AUTHORITY VARCHAR(50) not null,
-    constraint AUTHORITY_USER_USERNAME_FK
-        foreign key (USER_ID) references USER (ID)
-);
-```
-
-##### set up H2 datasource in application.properties
-```
-# setup H2 datasource
-spring.datasource.url=jdbc:h2:mem:oauth
-spring.datasource.username=admin
-spring.datasource.password=admin
-spring.datasource.driverClassName=org.h2.Driver
-# "always" is not something we would normally use for production .
-spring.datasource.initialization-mode=always
+import com.manning.ssia.milestone.jpa.Authority;
+import com.manning.ssia.milestone.jpa.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
-# for development only, can verify schema is generated and populated
-# http://localhost:8080/h2-console
-spring.h2.console.enabled=true
-```
-##### verify the schema is created at application startup
-- run the app 
-- connect to http://localhost:8080/h2-console
-- We required that all endpoints be authenticated,  so you'll need to enter a users credentials in the login form that appears
- e.g user=john and password=12345
-- in the  H2 admin console populate the password field with  "admin" and press connect 
-- some browsers may complain about opening the H2 console that has Iframes 
-- you can open up the left  nav frame in a new window and you should see the USER and AUTHORITY tables defined
+public class CustomUserDetails  implements UserDetails {
+        private User user;
 
-##### add some data into the USER and AUTHORITY tables
-under src/main/resources add a data.sql file 
-Add some entries to your USER and AUTHORITY tables to help populate the H2 in-memory DB with some initial data at application startup time
-```
-insert into USER (ID, USERNAME, PASSWORD) values (1, 'john' ,'12345);
-insert into USER (ID, USERNAME, PASSWORD) values (2, 'admin' ,'swordfish');
-INSERT INTO AUTHORITY ( USER_ID ,AUTHORITY ) values (1, 'ROLE_USER');
-INSERT INTO AUTHORITY ( USER_ID ,AUTHORITY ) values (2, 'ROLE_ADMIN');
-```
-##### verify USER table is populated with some data 
-start the app and connect to H2 console as before. 
-in the top nav window enter the following sql and clinck the "RUN" button
-```
-select * from USER;
-```
-you should see your two entries for john and admin
+        public CustomUserDetails(User user) {
+            this.user = user;
+        }
 
-##### Create a JPA entity for your USER table
-- We can use the Lombok @Data annotation to avoid adding setters and getters
-- don't worry about the authorities child collection just yet, we'll come back to that later 
-- the ```@Id   @GeneratedValue(strategy=GenerationType.IDENTITY)```  annotation indicates primary key IDs should be auto generated
-```
-@Data
-@Entity
-public class User {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return user.getAuthorities().stream()
+                .map(Authority::getAuthority)
+                .map(role -> new SimpleGrantedAuthority(role))
+                .collect(Collectors.toList());
+    }
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private int id;
-    private String username;
-    private String password;
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
 
-    
-    public User() {
+    @Override
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-               
+        return "CustomUserDetails{" +
+                "username=" + user.getUsername() +
+                "password=" + user.getPassword() +
+                ", authorities=" + this.getAuthorities()  +
                 '}';
     }
 }
+```
+
+
+##### create a Custom ClientDetails class 
+again I can use the JPA Client to help populate the Spring Security ClientDetails
+```
+
+import com.manning.ssia.milestone.jpa.Client;
+import com.manning.ssia.milestone.jpa.Grant;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.provider.ClientDetails;
+public class CustomClientDetails implements ClientDetails {
+
+    private final Client client;
+
+    public CustomClientDetails(Client client) {
+        this.client =client;
+    }
+
+    @Override
+    public String getClientId() {
+        return client.getName();
+    }
+
+    @Override
+    public Set<String> getResourceIds() {
+        return null;
+    }
+
+    @Override
+    public boolean isSecretRequired() {
+        return true;
+    }
+
+    @Override
+    public String getClientSecret() {
+        return client.getSecret();
+    }
+
+    @Override
+    public boolean isScoped() {
+        return true;
+    }
+
+    @Override
+    public Set<String> getScope() {
+        return new HashSet<>(Arrays.asList(client.getScope() ));
+
+    }
+
+    @Override
+    public Set<String> getAuthorizedGrantTypes() {
+        return client.getGrants().stream()
+                .map(Grant::getGrant)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> getRegisteredRedirectUri() {
+        return new HashSet<>(Collections.singletonList(client.getRedirectUri()));
+    }
+    @Override
+    public Collection<GrantedAuthority> getAuthorities() {
+       return Collections.singletonList(new SimpleGrantedAuthority("ROLE_CLIENT"));
+
+
+    }
+
+    @Override
+    public Integer getAccessTokenValiditySeconds() {
+        return 300;
+    }
+
+    @Override
+    public Integer getRefreshTokenValiditySeconds() {
+        return 300;
+    }
+
+    @Override
+    public boolean isAutoApprove(String s) {
+        return false;
+    }
+
+    @Override
+    public Map<String, Object> getAdditionalInformation() {
+        return null;
+    }
+
+
+    @Override
+    public String toString() {
+        return "CustomClientDetails{" +
+                "clientId=" + getClientId() +
+                "getAuthorizedGrantTypes=" + this.getAuthorizedGrantTypes()  +
+                "authorities=" + this.getAuthorities()  +
+                '}';
+    }
+}
+```
+##### Create A custom userDetailsService
+this user will connect to your User Jpa repositry to find a JPA user and convert it  into UserDetails
+object that is returned
+```
+
+import com.manning.ssia.milestone.jpa.User;
+import com.manning.ssia.milestone.jpa.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class JpaUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        log.info("looking up user {}", username);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            log.error("did not find user {}", username);
+            throw new UsernameNotFoundException(username);
+        }
+        com.manning.ssia.milestone.security.CustomUserDetails userDetails = new com.manning.ssia.milestone.security.CustomUserDetails(user);
+        log.info("found userdetails {}", userDetails);
+        return userDetails;
+    }
+}
+```
+#####  add a unit test for you new custom user details service 
+```
+
+@SpringBootTest
+class JpaUserDetailsServiceTest {
+
+    @Resource(name = "jpaUserDetailsService")
+    private JpaUserDetailsService userDetailsService;
+
+    @Test
+    void loadUserByUsernameJohnIsFound() {
+        UserDetails userDetails = userDetailsService.loadUserByUsername("john");
+        assertThat(userDetails.getUsername()).isEqualTo("john");
+        assertThat(userDetails.isEnabled()).isTrue();
+    }
+
+  @Test
+    void loadUserByUsernamenot_found() {
+         assertThrows(UsernameNotFoundException.class, () -> {
+            userDetailsService.loadUserByUsername("baduser");
+        });
+    }
+}
+```
+##### Create a custom ClientDetailsService
+this   will connect to your Client Jpa repository to find a JPA Client and convert it  into ClientDetails
+object that is returned
+```
+
+import com.manning.ssia.milestone.jpa.Client;
+import com.manning.ssia.milestone.jpa.ClientRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class JpaClientDetailsService implements ClientDetailsService {
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Override
+    public ClientDetails loadClientByClientId(String clientName) throws ClientRegistrationException {
+        log.info("looking up client {}",clientName);
+        Client client = clientRepository.findByName(clientName);
+        if (client == null) {
+            log.error ("did not find client {}",clientName);
+            throw new ClientRegistrationException(clientName);
+        }
+        CustomClientDetails clientDetails= new CustomClientDetails(client);
+
+        log.info("found clientDetails {}",clientDetails);
+        return clientDetails;
+    }
+}
+```
+ 
+##### Create a unit test for your custom clientDetailsService
+
+```import org.junit.jupiter.api.Test;
+   import org.springframework.boot.test.context.SpringBootTest;
+   import org.springframework.security.oauth2.provider.ClientDetails;
+   import org.springframework.security.oauth2.provider.ClientRegistrationException;
+   import javax.annotation.Resource;
+   import static org.assertj.core.api.Assertions.assertThat;
+   import static org.junit.jupiter.api.Assertions.assertThrows;
+   
+   
+   @SpringBootTest
+   class JpaClientDetailsServiceTest {
+   
+       @Resource(name = "jpaClientDetailsService")
+       private JpaClientDetailsService clientDetailsService;
+   
+       @Test
+       void loadClientByClientId_success() {
+           ClientDetails clientDetails = clientDetailsService.loadClientByClientId("client");
+           assertThat(clientDetails.getClientId()).isEqualTo("client");
+           assertThat(clientDetails.isSecretRequired()).isTrue();
+       }
+   
+   
+       @Test
+       void loadClientByClientId_not_found() {
+           Exception exception = assertThrows(ClientRegistrationException.class, () -> {
+               ClientDetails clientDetails = clientDetailsService.loadClientByClientId("badclient");
+           });
+       }
+   }
 ```
 
 ##### create a User JPA Repository  interface
