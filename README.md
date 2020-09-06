@@ -6,9 +6,9 @@ Build an Oauth Server part 3  - replace in-memory userDetailsService with a cust
 1. SSIA Chapter 3  
   
   
-## create a custom UserDetailsService  
+## Create a Custom UserDetailsService  
  
-###  create a CustomUserDetails  class that implements UserDetails 
+###  first create a Custom UserDetails  class that implements the Spring Security UserDetails interface
 You'll need to create a Custom User class that implements the following interface
 ```
 package org.springframework.security.core.userdetails;
@@ -87,6 +87,70 @@ public class CustomUserDetails  implements UserDetails {
     }
 }
 ```
+
+
+##### Create A custom userDetailsService
+this user will connect to your User Jpa repositry to find a JPA user and convert it  into UserDetails
+object that is returned
+```
+
+import com.manning.ssia.milestone.jpa.User;
+import com.manning.ssia.milestone.jpa.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class JpaUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        log.info("looking up user {}", username);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            log.error("did not find user {}", username);
+            throw new UsernameNotFoundException(username);
+        }
+        com.manning.ssia.milestone.security.CustomUserDetails userDetails = new com.manning.ssia.milestone.security.CustomUserDetails(user);
+        log.info("found userdetails {}", userDetails);
+        return userDetails;
+    }
+}
+```
+#####  add a unit test for you new custom user details service 
+```
+
+@SpringBootTest
+class JpaUserDetailsServiceTest {
+
+    @Resource(name = "jpaUserDetailsService")
+    private JpaUserDetailsService userDetailsService;
+
+    @Test
+    void loadUserByUsernameJohnIsFound() {
+        UserDetails userDetails = userDetailsService.loadUserByUsername("john");
+        assertThat(userDetails.getUsername()).isEqualTo("john");
+        assertThat(userDetails.isEnabled()).isTrue();
+    }
+
+  @Test
+    void loadUserByUsernamenot_found() {
+         assertThrows(UsernameNotFoundException.class, () -> {
+            userDetailsService.loadUserByUsername("baduser");
+        });
+    }
+}
+```
+
+  
+## Create a Custom JPA based ClientDetailsService  
 
 
 ##### create a Custom ClientDetails class 
@@ -186,66 +250,8 @@ public class CustomClientDetails implements ClientDetails {
     }
 }
 ```
-##### Create A custom userDetailsService
-this user will connect to your User Jpa repositry to find a JPA user and convert it  into UserDetails
-object that is returned
-```
 
-import com.manning.ssia.milestone.jpa.User;
-import com.manning.ssia.milestone.jpa.UserRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-
-@Slf4j
-@Service
-public class JpaUserDetailsService implements UserDetailsService {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) {
-        log.info("looking up user {}", username);
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            log.error("did not find user {}", username);
-            throw new UsernameNotFoundException(username);
-        }
-        com.manning.ssia.milestone.security.CustomUserDetails userDetails = new com.manning.ssia.milestone.security.CustomUserDetails(user);
-        log.info("found userdetails {}", userDetails);
-        return userDetails;
-    }
-}
-```
-#####  add a unit test for you new custom user details service 
-```
-
-@SpringBootTest
-class JpaUserDetailsServiceTest {
-
-    @Resource(name = "jpaUserDetailsService")
-    private JpaUserDetailsService userDetailsService;
-
-    @Test
-    void loadUserByUsernameJohnIsFound() {
-        UserDetails userDetails = userDetailsService.loadUserByUsername("john");
-        assertThat(userDetails.getUsername()).isEqualTo("john");
-        assertThat(userDetails.isEnabled()).isTrue();
-    }
-
-  @Test
-    void loadUserByUsernamenot_found() {
-         assertThrows(UsernameNotFoundException.class, () -> {
-            userDetailsService.loadUserByUsername("baduser");
-        });
-    }
-}
-```
-##### Create a custom ClientDetailsService
+##### implement a custom JpaClientDetailsService class that implements the ClientDetailsService interface
 this   will connect to your Client Jpa repository to find a JPA Client and convert it  into ClientDetails
 object that is returned
 ```
@@ -316,7 +322,7 @@ public class JpaClientDetailsService implements ClientDetailsService {
    }
 ```
 
-##### replace in-memory client details service with your impl
+##### replace the in-memory clientDetailsService with your JPA impl
 ```
 
 @Configuration
@@ -363,10 +369,18 @@ public class OAuthConfig extends AuthorizationServerConfigurerAdapter {
         return new DelegatingPasswordEncoder(idForEncode, encoders);
     }
 ```
- 
-##### rerun all your unit and postman tests, everything should be usccessful
+##### temporarily add a {noop} prefix to the place where your store passwords ands secrets
+```
+insert into USER (ID, USERNAME, PASSWORD) values (1, 'john' ,'{noop}12345); 
 
-##### create a simple utility to convert plain text into a bcrypt hash
+insert into CLIENT (ID, NAME, SECRET, REDIRECT_URI, SCOPE)
+values (1, 'client','{noop}secret' ,'http://localhost:8181/', 'read');
+
+```
+
+rerun all your unit and postman tests, everything should still be usccessful
+
+##### create a simple utility to convert a plain text password/secret into a bcrypt hash
 ```
 
 public class PasswordEncoderTest {
@@ -380,15 +394,15 @@ public class PasswordEncoderTest {
     }
 }
 ```
-then replace the noop passwords with the bcrypt equivalent and rerun your tests
+##### replace the {noop} passwords with their {bcrypt} equivalent and rerun your tests
 ```
 insert into USER (ID, USERNAME, PASSWORD) 
     values (1, 'john' ,'{bcrypt}$2a$10$iMMb7iGNjDAlqkwlR4TJHuhwtMGq.sMGL5v3TEiCt53vIiGke0cpa');
 
 insert into CLIENT (ID, NAME, SECRET, REDIRECT_URI, SCOPE)
     values (1, 'client','{bcrypt}$2a$10$CVLUeCYqZQpLRm0PpaXXTuvskBujQelGhmxoCXXU0RylBrTQOiqQW' ,'http://localhost:8181/', 'read');
-
 ```
+you can experiment with changing a character in the hash, your unit and postman tests should fail
  
  ##### rerun your oauth password grant  postman  test from milestone1
  if you've kept the same passwords between milestones your token grant request should still work
