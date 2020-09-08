@@ -1,13 +1,11 @@
-package com.manning.ssia.milestone.controller;
+package com.manning.ssia.milestone.domain;
 
 import com.manning.ssia.milestone.jpa.Client;
 import com.manning.ssia.milestone.jpa.Grant;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,17 +20,18 @@ public class ClientDomain {
     private String scope;
     private String redirectUri;
 
-    @Size(min=1)
+    @Size(min = 1)
     private List<String> grants;
 
-    ClientDomain( ){}
+    public ClientDomain() {
+    }
 
     public ClientDomain(Client client) {
         this.id = client.getId();
         this.name = client.getName();
         this.secret = client.getSecret();
         this.scope = client.getScope();
-        this.redirectUri =client.getRedirectUri();
+        this.redirectUri = client.getRedirectUri();
         this.grants = client.getGrants()
                 .stream()
                 .map(Grant::getGrant)

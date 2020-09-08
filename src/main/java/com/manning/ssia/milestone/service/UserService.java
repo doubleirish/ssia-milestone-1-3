@@ -1,6 +1,6 @@
 package com.manning.ssia.milestone.service;
 
-import com.manning.ssia.milestone.controller.UserDomain;
+import com.manning.ssia.milestone.domain.UserDomain;
 import com.manning.ssia.milestone.jpa.Authority;
 import com.manning.ssia.milestone.jpa.User;
 import com.manning.ssia.milestone.jpa.UserRepository;

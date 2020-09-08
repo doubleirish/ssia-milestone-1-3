@@ -1,5 +1,6 @@
 package com.manning.ssia.milestone.controller;
 
+import com.manning.ssia.milestone.domain.UserDomain;
 import com.manning.ssia.milestone.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

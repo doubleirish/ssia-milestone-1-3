@@ -1,11 +1,9 @@
 package com.manning.ssia.milestone.service;
 
-import com.manning.ssia.milestone.controller.ClientDomain;
-import com.manning.ssia.milestone.controller.UserDomain;
+import com.manning.ssia.milestone.domain.ClientDomain;
 import com.manning.ssia.milestone.jpa.Client;
 import com.manning.ssia.milestone.jpa.ClientRepository;
 import com.manning.ssia.milestone.jpa.Grant;
-import com.manning.ssia.milestone.jpa.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

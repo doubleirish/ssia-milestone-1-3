@@ -1,5 +1,6 @@
 package com.manning.ssia.milestone.controller;
 
+import com.manning.ssia.milestone.domain.ClientDomain;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

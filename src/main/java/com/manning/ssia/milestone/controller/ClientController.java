@@ -1,7 +1,7 @@
 package com.manning.ssia.milestone.controller;
 
 
-import com.manning.ssia.milestone.jpa.Client;
+import com.manning.ssia.milestone.domain.ClientDomain;
 import com.manning.ssia.milestone.service.ClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

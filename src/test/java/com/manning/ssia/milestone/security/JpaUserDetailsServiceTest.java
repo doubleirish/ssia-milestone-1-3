@@ -1,5 +1,6 @@
 package com.manning.ssia.milestone.security;
 
+import com.manning.ssia.milestone.service.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +29,7 @@ class JpaUserDetailsServiceTest {
 
     @Test
     void loadUserByUsernamenot_found() {
-         assertThrows(UsernameNotFoundException.class, () -> {
+         assertThrows(UserNotFoundException.class, () -> {
             userDetailsService.loadUserByUsername("baduser");
         });
     }
