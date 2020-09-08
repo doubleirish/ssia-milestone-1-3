@@ -407,3 +407,98 @@ you can experiment with changing a character in the hash, your unit and postman 
  ##### rerun your oauth password grant  postman  test from milestone1
  if you've kept the same passwords between milestones your token grant request should still work
  except now it's no longer using a in-memory user/pass client/secret setup but pull those credentials and hashs from the database 
+ 
+ 
+ # Bonus
+ 
+ ## Add JSR 303 Validation to 
+ enabling a validator will allow us to verify that not only are sudmitted users and clients fields present but they are symatically correct too
+ ##### add validation dependency to pom.xml
+```
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+``` 
+##### add jsr303 validation annotations to your user and client domain objects
+
+```
+
+@Data
+public class ClientDto {
+    private int id;
+    @NotBlank(message = "the client name must be defined")
+    private String name;
+
+```
+##### add the @Valid annotation to the controller POST methods
+```
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public ClientDto createClient(@Valid @RequestBody ClientDto clientDomain) {
+        Client client = convertToEntity(clientDomain);
+        client = clientRepository.save(client);
+        log.info("created client {}",client);
+        return convertToDto(client);
+    }
+
+```
+
+##### send a postman request with an invalid user or client
+e.g sending a blank client name ...
+```
+{
+        
+        "name": "",
+        "secret": "newsecret",
+        "scope": "read",
+        "redirectUri": "http://localhost:8181/",
+        "grants": [
+            "authorization_code",
+            "password",
+            "client_credentials",
+            "refresh_token"
+        ]
+    }
+``` 
+should return a standard 400 BAD_REQUEST message
+```{
+       "timestamp": "2020-09-08T04:06:34.745+00:00",
+       "status": 400,
+       "error": "Bad Request",
+       "message": "",
+       "path": "/clients"
+   }
+```
+To get a better error message add a RestControllerAdvice class
+```
+package com.manning.ssia.milestone.controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class ClientControllerAdvice {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,String> handleValiationExceptions(MethodArgumentNotValidException ex){
+        Map<String,String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error ->{
+            String fieldName= ((FieldError)error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName,errorMessage);
+        });
+        return errors;
+
+    }
+}
+
+```

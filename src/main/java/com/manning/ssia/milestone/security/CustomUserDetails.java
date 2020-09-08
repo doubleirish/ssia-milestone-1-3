@@ -1,5 +1,6 @@
 package com.manning.ssia.milestone.security;
 
+import com.manning.ssia.milestone.controller.UserDomain;
 import com.manning.ssia.milestone.jpa.Authority;
 import com.manning.ssia.milestone.jpa.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,28 +11,27 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class CustomUserDetails  implements UserDetails {
-        private User user;
+        private UserDomain userDomain;
 
-        public CustomUserDetails(User user) {
-            this.user = user;
+        public CustomUserDetails(UserDomain userDomain) {
+            this.userDomain = userDomain;
         }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getAuthorities().stream()
-                .map(Authority::getAuthority)
-                .map(role -> new SimpleGrantedAuthority(role))
+        return userDomain.getAuthorities().stream()
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return userDomain.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return userDomain.getUsername();
     }
 
     @Override
@@ -57,8 +57,8 @@ public class CustomUserDetails  implements UserDetails {
     @Override
     public String toString() {
         return "CustomUserDetails{" +
-                "username=" + user.getUsername() +
-                "password=" + user.getPassword() +
+                "username=" + userDomain.getUsername() +
+                "password=" + userDomain.getPassword() +
                 ", authorities=" + this.getAuthorities()  +
                 '}';
     }

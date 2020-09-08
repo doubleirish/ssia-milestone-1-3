@@ -9,6 +9,8 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class JpaClientDetailsService implements ClientDetailsService {
@@ -19,11 +21,9 @@ public class JpaClientDetailsService implements ClientDetailsService {
     @Override
     public ClientDetails loadClientByClientId(String clientName) throws ClientRegistrationException {
         log.info("looking up client {}",clientName);
-        Client client = clientRepository.findByName(clientName);
-        if (client == null) {
-            log.error ("did not find client {}",clientName);
-            throw new ClientRegistrationException(clientName);
-        }
+         Client client = clientRepository.findByName(clientName)
+                .orElseThrow(() -> new ClientRegistrationException("client not found :"+clientName)  );
+
         CustomClientDetails clientDetails= new CustomClientDetails(client);
 
         log.info("found clientDetails {}",clientDetails);

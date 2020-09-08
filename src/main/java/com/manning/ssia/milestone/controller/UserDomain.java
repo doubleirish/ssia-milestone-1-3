@@ -10,13 +10,15 @@ import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
-public class UserDto {
+public class UserDomain {
     private int id;
     private String username;
     private String password;
     private List<String> authorities;
 
-    UserDto(User user) {
+
+
+    public UserDomain(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();

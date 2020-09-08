@@ -28,25 +28,25 @@ public class ClientControllerTest {
 
     @Test
     public void clientById() throws Exception {
-        ClientDto clientDto =  this.restTemplate.getForObject("http://localhost:" + port + "/clients/1",  ClientDto.class);
+        ClientDomain clientDomain =  this.restTemplate.getForObject("http://localhost:" + port + "/clients/1",  ClientDomain.class);
 
-        assertThat(clientDto.getName()).isEqualTo("client");
+        assertThat(clientDomain.getName()).isEqualTo("client");
     }
 
 
     @Test
     public void createClient() throws Exception {
-        ClientDto clientDto = new ClientDto();
-        clientDto.setName("newclient");
-        clientDto.setSecret("newpass");
-        clientDto.setScope("read");
-        clientDto.setGrants(Arrays.asList("user","admin","read"));
-        clientDto.setRedirectUri("http://localhost:8080/authorized");
-        ClientDto returnClientDto =  this.restTemplate.postForObject("http://localhost:" + port + "/clients",  clientDto,ClientDto.class);
+        ClientDomain clientDomain = new ClientDomain();
+        clientDomain.setName("newclient");
+        clientDomain.setSecret("newpass");
+        clientDomain.setScope("read");
+        clientDomain.setGrants(Arrays.asList("user","admin","read"));
+        clientDomain.setRedirectUri("http://localhost:8080/authorized");
+        ClientDomain returnClientDomain =  this.restTemplate.postForObject("http://localhost:" + port + "/clients", clientDomain, ClientDomain.class);
 
-        System.out.println(returnClientDto);
+        System.out.println(returnClientDomain);
 
-        assertThat(returnClientDto.getName()).isEqualTo(clientDto.getName());
+        assertThat(returnClientDomain.getName()).isEqualTo(clientDomain.getName());
     }
 
 }

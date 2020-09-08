@@ -10,6 +10,8 @@ import org.springframework.test.context.TestPropertySource;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -39,13 +41,15 @@ public class UserRepositoryTest {
     @Test
 
     void findByUsername() {
-        User user = userRepository.findByUsername("john");
-        assertThat(user.getUsername()).isEqualTo("john");
+        Optional<User> user = userRepository.findByUsername("john");
+        assertThat(user.isPresent());
+        assertThat(user.get().getUsername()).isEqualTo("john");
     }
 
     @Test
     void johnUserhasAtLeastOneAuthority() {
-        User user = userRepository.findByUsername("john");
-        assertThat(user.getAuthorities()).isNotEmpty();
+        Optional<User> user = userRepository.findByUsername("john");
+        assertThat(user.isPresent());
+        assertThat(user.get().getAuthorities()).isNotEmpty();
     }
 }

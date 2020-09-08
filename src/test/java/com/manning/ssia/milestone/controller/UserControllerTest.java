@@ -30,27 +30,27 @@ public class UserControllerTest {
 
     @Test
     public void userById() throws Exception {
-        UserDto userDto = this.restTemplate
+        UserDomain userDomain = this.restTemplate
                 .withBasicAuth("john", "12345")
-                .getForObject("http://localhost:" + port + "/users/1", UserDto.class);
-        assertThat(userDto.getId()).isEqualTo(1);
-        assertThat(userDto.getUsername()).isEqualTo("john");
+                .getForObject("http://localhost:" + port + "/users/1", UserDomain.class);
+        assertThat(userDomain.getId()).isEqualTo(1);
+        assertThat(userDomain.getUsername()).isEqualTo("john");
     }
 
 
     @Test
     public void createUser() throws Exception {
-        UserDto userDto = new UserDto();
-        userDto.setUsername("newuser");
-        userDto.setPassword("newpass");
-        userDto.setAuthorities(Arrays.asList("user", "admin"));
-        UserDto returnUserDto = this.restTemplate
+        UserDomain userDomain = new UserDomain();
+        userDomain.setUsername("newuser");
+        userDomain.setPassword("newpass");
+        userDomain.setAuthorities(Arrays.asList("user", "admin"));
+        UserDomain returnUserDomain = this.restTemplate
                 .withBasicAuth("john", "12345")
-                .postForObject("http://localhost:" + port + "/users", userDto, UserDto.class);
+                .postForObject("http://localhost:" + port + "/users", userDomain, UserDomain.class);
 
-        System.out.println(returnUserDto);
+        System.out.println(returnUserDomain);
 
-        assertThat(returnUserDto.getUsername()).isEqualTo(userDto.getUsername());
+        assertThat(returnUserDomain.getUsername()).isEqualTo(userDomain.getUsername());
     }
 
 }
