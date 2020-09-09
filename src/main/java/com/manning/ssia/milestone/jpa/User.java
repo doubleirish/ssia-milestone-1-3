@@ -9,17 +9,18 @@ import java.util.List;
 @Entity
 public class User {
 
+
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
     private String password;
 
+
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<com.manning.ssia.milestone.jpa.Authority> authorities;
 
-    public User() {
-    }
 
     @Override
     public String toString() {

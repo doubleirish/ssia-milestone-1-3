@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class AliveControllerTest {
+public class AliveControllerIntegrationTests {
     @LocalServerPort
     private int port;
     @Autowired

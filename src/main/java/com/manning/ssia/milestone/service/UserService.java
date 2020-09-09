@@ -57,13 +57,15 @@ public class UserService {
         User user = new User();
         user.setUsername(userDomain.getUsername());
         user.setPassword(userDomain.getPassword());
+        List<String> auths = userDomain.getAuthorities();
+        if (auths != null && auths.size() > 0) {
+            List<Authority> authorities = auths
+                    .stream()
+                    .map(a -> new Authority(a, user))
+                    .collect(Collectors.toList());
 
-        List<Authority> authorities = userDomain.getAuthorities()
-                .stream()
-                .map(a -> new Authority(a, user))
-                .collect(Collectors.toList());
-
-        user.setAuthorities(authorities);
+            user.setAuthorities(authorities);
+        }
         userRepository.save(user);
         return user;
     }

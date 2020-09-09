@@ -3,12 +3,14 @@ package com.manning.ssia.milestone.domain;
 import com.manning.ssia.milestone.jpa.Client;
 import com.manning.ssia.milestone.jpa.Grant;
 import lombok.Data;
+import org.springframework.boot.jackson.JsonComponent;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@JsonComponent
 @Data
 public class ClientDomain {
     private int id;

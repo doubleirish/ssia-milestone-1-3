@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class OAuthTest {
+public class OAuthIntegrationTest {
     @LocalServerPort
     private int port;
     @Autowired

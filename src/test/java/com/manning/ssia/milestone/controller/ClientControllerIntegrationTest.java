@@ -13,7 +13,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class ClientControllerTest {
+public class ClientControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
