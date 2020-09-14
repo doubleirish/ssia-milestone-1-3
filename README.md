@@ -2,20 +2,11 @@
 Build an Oauth Server part 3  - replace in-memory userDetailsService with a custom UserDetailsService that is DB backed</description>
  
 #####
-Milestone 1.2 is probably going to take most folks close to 10 hours to complete
-if you find in practice that students are taking longer than 10 hours, it is probably possible to break this project in further sub projects
-one to build/test the data tier and one to build/test the controller/service tiers. 
-
+ 
 Milestone 1.3 should be about 4 hours unless they get into difficulties. 
 FYI, I refactored my Impl between milestone 1.2 and milestone 1.3 to add a service layer
 
-because of a variety of skill levels between students,
- some will need the full 8-10 hours and some might finish earlier.
- 
-One Option to keep smart/lucky students from getting bored are Bonus tasks.
-
-Since I had some extra time available for milestone 1.3, I worked on some optional tasks :-
-- add JSR 303 validation to your endpoints for adding a user or a client
+Some  Bonus tasks if you have extra time- add JSR 303 validation to your endpoints for adding a user or a client
 - add a Unit Test and postman to test your JSR 303 valiation  
 - add a @JsonTest to verify JSON serialization and deSerialization 
 - Add a Github Action to build your milestone in the cloud
@@ -24,8 +15,7 @@ Since I had some extra time available for milestone 1.3, I worked on some option
  
 ##### Suggested  recommended reading list 
  
-1. SSIA Chapter 3  -UserDetailsService
-1. Spring in Action 
+1. SSIA Chapter 3  - UserDetailsService
 1. Cloud native Spring in Action, section 3.4 on Testing your web, service and data tiers
   
   
