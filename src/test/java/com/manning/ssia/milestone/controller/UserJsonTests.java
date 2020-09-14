@@ -2,8 +2,9 @@ package com.manning.ssia.milestone.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manning.ssia.milestone.domain.UserDomain;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
@@ -17,7 +18,7 @@ public class UserJsonTests {
     private JacksonTester<UserDomain> json;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         ObjectMapper objectMapper = new ObjectMapper();
         JacksonTester.initFields(this, objectMapper);
