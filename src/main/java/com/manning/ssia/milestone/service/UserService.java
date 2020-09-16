@@ -32,14 +32,14 @@ public class UserService {
 
     public UserDomain findByid(Integer id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("user not found by id" + id));
+                .orElseThrow(() -> new UserNotFoundException("user not found by id : " + id));
         return convertToDomain(user);
     }
 
 
     public UserDomain findByUsername(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("user not found by name" + username));
+                .orElseThrow(() -> new UserNotFoundException("user not found by name : " + username));
         return convertToDomain(user);
     }
 
