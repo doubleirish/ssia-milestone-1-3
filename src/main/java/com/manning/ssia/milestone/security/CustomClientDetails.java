@@ -68,12 +68,12 @@ public class CustomClientDetails implements ClientDetails {
 
     @Override
     public Integer getAccessTokenValiditySeconds() {
-        return 300;
+        return 3600 * 4;
     }
 
     @Override
     public Integer getRefreshTokenValiditySeconds() {
-        return 300;
+        return 3600 * 4;
     }
 
     @Override
