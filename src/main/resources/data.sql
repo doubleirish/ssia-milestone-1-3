@@ -17,7 +17,7 @@ INSERT INTO AUTHORITY ( USER_ID ,AUTHORITY ) values (8, 'ROLE_USER');
 
 
 insert into CLIENT (ID, NAME, SECRET, REDIRECT_URI, SCOPE)
-values (1, 'client','{bcrypt}$2a$10$CVLUeCYqZQpLRm0PpaXXTuvskBujQelGhmxoCXXU0RylBrTQOiqQW' ,'http://localhost:8181/', 'read');
+values (1, 'client','{bcrypt}$2a$10$CVLUeCYqZQpLRm0PpaXXTuvskBujQelGhmxoCXXU0RylBrTQOiqQW' ,'http://localhost:7070/profile', 'read');
 
 insert into GRANT (CLIENT_ID, GRANT  ) values (1,  'authorization_code' );
 insert into GRANT (CLIENT_ID, GRANT  ) values (1,  'password' );
@@ -27,3 +27,8 @@ insert into GRANT (CLIENT_ID, GRANT  ) values (1,  'refresh_token' );
 
 insert into CLIENT (ID, NAME, SECRET, REDIRECT_URI, SCOPE)
 values (2, 'client2','{bcrypt}$2a$10$CVLUeCYqZQpLRm0PpaXXTuvskBujQelGhmxoCXXU0RylBrTQOiqQW' ,'http://localhost:8181/', 'advice');
+
+insert into GRANT (CLIENT_ID, GRANT  ) values (2,  'authorization_code' );
+insert into GRANT (CLIENT_ID, GRANT  ) values (2,  'password' );
+insert into GRANT (CLIENT_ID, GRANT  ) values (2,  'client_credentials');
+insert into GRANT (CLIENT_ID, GRANT  ) values (2,  'refresh_token' );
