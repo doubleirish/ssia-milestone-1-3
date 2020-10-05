@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 public class CustomClientDetails implements ClientDetails {
 
     private final Client client;

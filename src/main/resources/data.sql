@@ -26,7 +26,7 @@ insert into GRANT (CLIENT_ID, GRANT  ) values (1,  'refresh_token' );
 
 
 insert into CLIENT (ID, NAME, SECRET, REDIRECT_URI, SCOPE)
-values (2, 'client2','{bcrypt}$2a$10$CVLUeCYqZQpLRm0PpaXXTuvskBujQelGhmxoCXXU0RylBrTQOiqQW' ,'http://localhost:8181/', 'advice');
+values (2, 'client2','{bcrypt}$2a$10$CVLUeCYqZQpLRm0PpaXXTuvskBujQelGhmxoCXXU0RylBrTQOiqQW' ,'http://localhost:7070/advice', 'advice');
 
 insert into GRANT (CLIENT_ID, GRANT  ) values (2,  'authorization_code' );
 insert into GRANT (CLIENT_ID, GRANT  ) values (2,  'password' );
